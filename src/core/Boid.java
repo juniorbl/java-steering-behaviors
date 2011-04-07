@@ -5,6 +5,9 @@ import javax.vecmath.Vector2d;
 import enums.BehaviorEnum;
 
 /**
+ * The simulated creature (http://www.red3d.com/cwr/boids).
+ * Note: The "desired velocity" is a vector in the direction from the character to the target (Craig W. Reynolds).
+ * 
  * @author Carlos Luz Junior
  */
 public class Boid {
@@ -22,32 +25,43 @@ public class Boid {
 		distanceToTarget = 0d;
 	}
 	
+	/**
+	 * Steers the boid to move toward the target (http://www.red3d.com/cwr/steer/SeekFlee.html).
+	 */
 	public void seek(Vector2d targetPosition) {
-		Vector2d directionToTarget = new Vector2d();
-		directionToTarget.sub(targetPosition, position);
-		distanceToTarget = directionToTarget.length();
-		directionToTarget.normalize();
-		steerForce.sub(directionToTarget, velocity);
+		Vector2d desiredVelocity = new Vector2d();
+		desiredVelocity.sub(targetPosition, position);
+		desiredVelocity.normalize();
+		desiredVelocity.scale(MAX_SPEED);
+		distanceToTarget = desiredVelocity.length();
+		steerForce.sub(desiredVelocity, velocity);
 	}
 	
+	/**
+	 * Steers the boid to move away from the target (http://www.red3d.com/cwr/steer/SeekFlee.html).
+	 */
 	public void flee(Vector2d targetPosition) {
-		Vector2d directionToTarget = new Vector2d();
-		directionToTarget.sub(position, targetPosition);
-		distanceToTarget = directionToTarget.length();
-		directionToTarget.normalize();
-		steerForce.sub(directionToTarget, velocity);
+		Vector2d desiredVelocity = new Vector2d();
+		desiredVelocity.sub(position, targetPosition);
+		desiredVelocity.normalize();
+		desiredVelocity.scale(MAX_SPEED);
+		distanceToTarget = desiredVelocity.length();
+		steerForce.sub(desiredVelocity, velocity);
 	}
 	
-	public void arrive(Vector2d targetPosition) {
+	/**
+	 * Steers the boid to arrive slowly on the target (http://www.red3d.com/cwr/steer/Arrival.html).
+	 */
+	public void arrival(Vector2d targetPosition) {
 		int arriveRadius = 160;
-		Vector2d directionToTarget = new Vector2d();
-		directionToTarget.sub(targetPosition, position);
-		distanceToTarget = directionToTarget.length();
+		Vector2d desiredVelocity = new Vector2d();
+		desiredVelocity.sub(targetPosition, position);
+		distanceToTarget = desiredVelocity.length();
 		if (distanceToTarget > 0) {
 			Double speed = MAX_SPEED * (distanceToTarget / arriveRadius);
 			speed = Math.min(speed, MAX_SPEED);
-			directionToTarget.scale(speed / distanceToTarget);
-			steerForce.sub(directionToTarget, velocity);
+			desiredVelocity.scale(speed / distanceToTarget);
+			steerForce.sub(desiredVelocity, velocity);
 		}
 	}
 	
@@ -58,7 +72,6 @@ public class Boid {
 		acceleration.setX(steerForce.getX() / MASS);
 		acceleration.setY(steerForce.getY() / MASS);
 		velocity.add(acceleration);
-		velocity.scale(MAX_SPEED);
 		position.add(velocity, position);
 	}
 
@@ -71,7 +84,7 @@ public class Boid {
 			flee(targetPosition);
 			break;
 		case ARRIVAL:
-			arrive(targetPosition);
+			arrival(targetPosition);
 			break;
 		}
 	}

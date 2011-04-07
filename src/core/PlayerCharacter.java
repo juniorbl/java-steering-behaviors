@@ -8,7 +8,7 @@ import javax.vecmath.Vector2d;
  */
 public class PlayerCharacter {
 	private Vector2d position = new Vector2d();
-	public static final int MAX_SPEED = 5;
+	public static final int MAX_SPEED = 2;
 	private int newX;
 	private int newY;
 	
