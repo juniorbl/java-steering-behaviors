@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -24,6 +25,7 @@ public class Board extends JPanel implements ActionListener {
 	private PlayerCharacter playerCharacter;
 	private BehaviorEnum behavior;
 	private Graphics2D graphics2d;
+	private ArrayList<Vector2d> checkpoints;
 
 	public Board() {
 		addKeyListener(new TAdapter());
@@ -31,7 +33,8 @@ public class Board extends JPanel implements ActionListener {
 		setBackground(Color.WHITE);
 		setDoubleBuffered(true);
 
-		boid = new Boid(new Vector2d(400, 300));
+		loadPredefinedPath();
+		boid = new Boid(new Vector2d(400, 300), checkpoints);
 		playerCharacter = new PlayerCharacter();
 		behavior = BehaviorEnum.SEEK;
 
@@ -44,7 +47,7 @@ public class Board extends JPanel implements ActionListener {
 		graphics2d = (Graphics2D) g;
 		drawCircles();
 		drawInfoRect();
-		drawPredefinedPath();
+		drawCheckPointNumbers();
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
 	}
@@ -58,31 +61,13 @@ public class Board extends JPanel implements ActionListener {
 		graphics2d.drawString("Distance to the target:" + boid.getDistanceToTarget(), 600, 20);
 	}
 
-	private void drawPredefinedPath() {
-		drawCheckPointNumbers();
-		drawPathLines();
-	}
-
-	private void drawPathLines() {
-		graphics2d.drawLine(120, 200, 20, 400);
-		graphics2d.drawLine(20, 400, 400, 400);
-		graphics2d.drawLine(400, 400, 600, 500);
-		graphics2d.drawLine(600, 500, 750, 300);
-		graphics2d.drawLine(750, 300, 400, 100);
-		graphics2d.drawLine(400, 100, 300, 150);
-		graphics2d.drawLine(300, 150, 300, 200);
-		graphics2d.drawLine(300, 200, 120, 200);
-	}
-
 	private void drawCheckPointNumbers() {
-		graphics2d.drawString("(1)", 120, 200);
-		graphics2d.drawString("(2)", 20, 400);
-		graphics2d.drawString("(3)", 400, 400);
-		graphics2d.drawString("(4)", 600, 500);
-		graphics2d.drawString("(5)", 750, 300);
-		graphics2d.drawString("(6)", 400, 100);
-		graphics2d.drawString("(7)", 300, 150);
-		graphics2d.drawString("(8)", 300, 200);
+		for (int checkpointIndex = 0; checkpointIndex < checkpoints.size(); checkpointIndex++) {
+			graphics2d.drawString(
+				"(" + checkpointIndex + ")",
+				(int) checkpoints.get(checkpointIndex).getX(),
+				(int) checkpoints.get(checkpointIndex).getY());
+		}
 	}
 
 	private void drawCircles() {
@@ -90,6 +75,18 @@ public class Board extends JPanel implements ActionListener {
 		graphics2d.fillOval(boid.getX(), boid.getY(), 30, 30);
 		graphics2d.setColor(Color.RED);
 		graphics2d.fillOval(playerCharacter.getX(), playerCharacter.getY(), 30, 30);
+	}
+	
+	private void loadPredefinedPath() {
+		checkpoints = new ArrayList<Vector2d>();
+		checkpoints.add(new Vector2d(120, 200));
+		checkpoints.add(new Vector2d(20, 400));
+		checkpoints.add(new Vector2d(400, 400));
+		checkpoints.add(new Vector2d(600, 500));
+		checkpoints.add(new Vector2d(750, 300));
+		checkpoints.add(new Vector2d(400, 100));
+		checkpoints.add(new Vector2d(300, 150));
+		checkpoints.add(new Vector2d(300, 200));
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -116,7 +113,6 @@ public class Board extends JPanel implements ActionListener {
 			}
 			if (key == KeyEvent.VK_P) {
 				behavior = BehaviorEnum.PATHFOLLOWING;
-				drawPredefinedPath();
 			}
 		}
 	}
